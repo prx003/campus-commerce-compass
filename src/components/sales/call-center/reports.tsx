@@ -94,6 +94,7 @@ export function ReportsPage() {
         STATUS_LABELS[l.status as keyof typeof STATUS_LABELS] ?? l.status,
       "Assigned Agent": l.assigned_name ?? "Unassigned",
       Notes: l.notes ?? "",
+      "Agent Reason": l.reason ?? "",
       Created: new Date(l.created_at).toLocaleString(),
       Updated: new Date(l.updated_at).toLocaleString(),
     }));
