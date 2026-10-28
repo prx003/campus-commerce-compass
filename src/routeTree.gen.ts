@@ -24,6 +24,7 @@ import { Route as AppMarketingRouteImport } from './routes/_app.marketing'
 import { Route as AppSalesRouteImport } from './routes/_app.sales'
 import { Route as AppStudentsRouteImport } from './routes/_app.students'
 import { Route as AppWorkspaceRouteImport } from './routes/_app.workspace'
+import { Route as AgentAgentIdRouteImport } from './routes/agent.$agentId'
 import { Route as SkillAiApplyRouteImport } from './routes/skill-ai.apply'
 import { Route as AppAcademicIndexRouteImport } from './routes/_app.academic.index'
 import { Route as AppAcademicAnnouncementsRouteImport } from './routes/_app.academic.announcements'
@@ -148,6 +149,11 @@ const AppWorkspaceRoute = AppWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
   getParentRoute: () => AppRoute,
+} as any)
+const AgentAgentIdRoute = AgentAgentIdRouteImport.update({
+  id: '/agent/$agentId',
+  path: '/agent/$agentId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SkillAiApplyRoute = SkillAiApplyRouteImport.update({
   id: '/skill-ai/apply',
@@ -422,6 +428,7 @@ export interface FileRoutesByFullPath {
   '/sales': typeof AppSalesRouteWithChildren
   '/students': typeof AppStudentsRoute
   '/workspace': typeof AppWorkspaceRoute
+  '/agent/$agentId': typeof AgentAgentIdRoute
   '/skill-ai/apply': typeof SkillAiApplyRoute
   '/academic/announcements': typeof AppAcademicAnnouncementsRoute
   '/academic/attendance': typeof AppAcademicAttendanceRoute
@@ -483,6 +490,7 @@ export interface FileRoutesByTo {
   '/marketing': typeof AppMarketingRoute
   '/students': typeof AppStudentsRoute
   '/workspace': typeof AppWorkspaceRoute
+  '/agent/$agentId': typeof AgentAgentIdRoute
   '/skill-ai/apply': typeof SkillAiApplyRoute
   '/': typeof AppIndexRoute
   '/academic/announcements': typeof AppAcademicAnnouncementsRoute
@@ -548,6 +556,7 @@ export interface FileRoutesById {
   '/_app/sales': typeof AppSalesRouteWithChildren
   '/_app/students': typeof AppStudentsRoute
   '/_app/workspace': typeof AppWorkspaceRoute
+  '/agent/$agentId': typeof AgentAgentIdRoute
   '/skill-ai/apply': typeof SkillAiApplyRoute
   '/_app/': typeof AppIndexRoute
   '/_app/academic/announcements': typeof AppAcademicAnnouncementsRoute
@@ -617,6 +626,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/students'
     | '/workspace'
+    | '/agent/$agentId'
     | '/skill-ai/apply'
     | '/academic/announcements'
     | '/academic/attendance'
@@ -678,6 +688,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/students'
     | '/workspace'
+    | '/agent/$agentId'
     | '/skill-ai/apply'
     | '/'
     | '/academic/announcements'
@@ -742,6 +753,7 @@ export interface FileRouteTypes {
     | '/_app/sales'
     | '/_app/students'
     | '/_app/workspace'
+    | '/agent/$agentId'
     | '/skill-ai/apply'
     | '/_app/'
     | '/_app/academic/announcements'
@@ -797,6 +809,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AgentAgentIdRoute: typeof AgentAgentIdRoute
   SkillAiApplyRoute: typeof SkillAiApplyRoute
 }
 
@@ -906,6 +919,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspace'
       preLoaderRoute: typeof AppWorkspaceRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/agent/$agentId': {
+      id: '/agent/$agentId'
+      path: '/agent/$agentId'
+      fullPath: '/agent/$agentId'
+      preLoaderRoute: typeof AgentAgentIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/skill-ai/apply': {
       id: '/skill-ai/apply'
@@ -1483,6 +1503,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AgentAgentIdRoute: AgentAgentIdRoute,
   SkillAiApplyRoute: SkillAiApplyRoute,
 }
 export const routeTree = rootRouteImport
