@@ -281,7 +281,7 @@ export function AssignPage() {
                   key={l.id}
                   className="border-t border-border hover:bg-muted/50  :bg-muted/30"
                 >
-                  <td className="p-3 font-medium text-foreground ">{l.name}</td>
+                  <td className="p-3 font-medium text-foreground ">{l.name}{l.reason && <p className="mt-1 max-w-xs text-xs font-normal text-muted-foreground">Reason: {l.reason}</p>}</td>
                   <td className="p-3 text-foreground ">{l.phone}</td>
                   <td className="p-3 text-foreground ">{l.email}</td>
                   <td className="p-3 text-foreground ">{l.source}</td>
