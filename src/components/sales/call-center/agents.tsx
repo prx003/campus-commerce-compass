@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { UserPlus, Users } from "lucide-react";
+import { Link2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,9 @@ export function CallCenterAgentsPage() {
       <Button type="submit" disabled={mutation.isPending || !name.trim()}><UserPlus />{mutation.isPending ? "Adding…" : "Add agent"}</Button>
     </form>
     <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full text-sm"><thead className="bg-muted text-muted-foreground"><tr><th className="p-3 text-left">Agent</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Added</th></tr></thead>
-        <tbody>{agents.map(agent => <tr key={agent.id} className="border-t border-border"><td className="p-3 font-medium">{agent.full_name}</td><td className="p-3">{agent.email || "—"}</td><td className="p-3">{new Date(agent.created_at).toLocaleDateString()}</td></tr>)}
-          {!agents.length && <tr><td colSpan={3} className="p-10 text-center text-muted-foreground"><Users className="mx-auto mb-3 size-6" />No agents yet</td></tr>}
+      <table className="w-full text-sm"><thead className="bg-muted text-muted-foreground"><tr><th className="p-3 text-left">Agent</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Added</th><th className="p-3 text-left">Agent link</th></tr></thead>
+        <tbody>{agents.map(agent => <tr key={agent.id} className="border-t border-border"><td className="p-3 font-medium">{agent.full_name}</td><td className="p-3">{agent.email || "—"}</td><td className="p-3">{new Date(agent.created_at).toLocaleDateString()}</td><td className="p-3"><Button type="button" size="sm" variant="outline" onClick={() => { const url = `${window.location.origin}/agent/${agent.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Link copied — send it to " + agent.full_name), () => toast.message(url)); }}><Link2 />Copy link</Button></td></tr>)}
+          {!agents.length && <tr><td colSpan={4} className="p-10 text-center text-muted-foreground"><Users className="mx-auto mb-3 size-6" />No agents yet</td></tr>}
         </tbody>
       </table>
     </div>

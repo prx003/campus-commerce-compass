@@ -3,7 +3,7 @@ import type { LeadStatus } from './lead-outcomes';
 
 export const KEY = 'edusphere.sales.call-center.v1';
 export type Agent = { id: string; full_name: string; email: string; created_at: string; roles: string[] };
-export type Lead = { id: string; name: string; phone: string | null; email: string | null; source: string | null; notes: string | null; status: LeadStatus; assigned_to: string | null; created_at: string; updated_at: string };
+export type Lead = { id: string; name: string; phone: string | null; email: string | null; source: string | null; notes: string | null; status: LeadStatus; assigned_to: string | null; created_at: string; updated_at: string; reason?: string | null; reason_at?: string | null };
 export type Message = { id: string; sender_name: string; body: string; created_at: string };
 export type State = { leads: Lead[]; agents: Agent[]; messages: Message[] };
 export const EMPTY: State = { leads: [], agents: [], messages: [] };
@@ -73,3 +73,15 @@ export async function getAnalytics() {
   const assigned = leads.filter(l => l.assigned_to).length;
   return { totals: { totalLeads: leads.length, assigned, unassigned: leads.length - assigned, workedRate: leads.length ? Math.round(leads.filter(l => l.status !== 'new').length / leads.length * 100) : 0 }, funnel: counts('status').map(v => ({ status: v.name, count: v.count })), sources: counts('source').map(v => ({ source: v.name, count: v.count })), perAgent: agents.map(a => { const rows = leads.filter(l => l.assigned_to === a.id); return { agentId: a.id, name: a.full_name, total: rows.length, contacted: rows.filter(l => l.status !== 'new').length }; }), trend: Array.from({ length: 30 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - 29 + i); const date = d.toISOString().slice(0,10); return { date, created: leads.filter(l => l.created_at.slice(0,10) === date).length }; }) };
 }
+// Agent share link: agent sees only leads the admin assigned to them and records a reason/outcome.
+export async function getAgentLinkData(agentId: string) {
+  const s = await read();
+  const agent = s.agents.find(a => a.id === agentId) ?? null;
+  return { agent, leads: agent ? s.leads.filter(l => l.assigned_to === agentId) : [] };
+}
+export const submitAgentReason = ({ data }: { data: { agentId: string; leadId: string; status: LeadStatus; reason: string } }) => change(s => {
+  const l = s.leads.find(l => l.id === data.leadId);
+  if (!l || l.assigned_to !== data.agentId) throw new Error('This lead is not assigned to you.');
+  l.status = data.status; l.reason = data.reason.trim() || null; l.reason_at = new Date().toISOString(); l.updated_at = l.reason_at;
+  return { ok: true };
+});
