@@ -3,8 +3,9 @@ import { Bell, LogOut } from 'lucide-react';
 import { useStore, roleLabels, deptName } from '../store/StoreContext';
 import { menus } from '../config/menus';
 import { DashboardRouter } from './DashboardRouter';
-import { ModuleShell, ModuleNavButton } from '@/components/layout/module-shell';
+import { PageHeader } from '@/components/ui/page';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function AppShell({ hideSignOut = false }: { hideSignOut?: boolean } = {}) {
   const { currentUser, data, logout, notifications, markNotificationRead } = useStore();
@@ -15,13 +16,43 @@ export function AppShell({ hideSignOut = false }: { hideSignOut?: boolean } = {}
   const currentActive = userMenus.some(item => item.id === activeMenu) ? activeMenu : userMenus[0]?.id ?? '';
   const userNotifs = notifications.filter(n => n.audience.includes(currentUser.role) && (!n.targetUserIds || n.targetUserIds.includes(currentUser.id)));
   const unreadCount = userNotifs.filter(n => !n.read).length;
-  return <ModuleShell title="College Portal" subtitle={roleLabels[currentUser.role]}
-    navigation={userMenus.map(item => <ModuleNavButton key={item.id} active={currentActive === item.id} icon={<item.icon className="size-[18px] shrink-0" />} onClick={() => setActiveMenu(item.id)}>{item.label}</ModuleNavButton>)}
-    footer={hideSignOut ? undefined : <Button variant="ghost" onClick={logout} className="module-nav-item w-full justify-start"><LogOut className="size-4" />Sign out</Button>}
-    actions={<><div className="text-right"><p className="text-sm font-medium">{currentUser.name}</p><p className="text-xs text-muted-foreground">{deptName(data, currentUser.departmentId)}</p></div><Button variant="outline" size="icon" aria-label="Notifications" onClick={() => setNotifOpen(!notifOpen)}><Bell className="size-4" />{unreadCount > 0 && <span className="text-xs">{unreadCount}</span>}</Button></>}>
-    {notifOpen && <section className="mb-6 border-b border-border pb-4"><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Notifications</h2><Button variant="ghost" size="sm" onClick={() => setNotifOpen(false)}>Close</Button></div>{userNotifs.length === 0 ? <p className="text-sm text-muted-foreground">No notifications</p> : userNotifs.map(n => <Button key={n.id} variant="ghost" className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => { markNotificationRead(n.id); if (n.title === 'Final Examination Schedule Published' && currentUser.role === 'hod') setActiveMenu('h-academic-management'); setNotifOpen(false); }}><span><span className="block font-medium">{n.title}</span><span className="block text-xs text-muted-foreground">{n.message}</span><span className="block text-xs text-muted-foreground">{n.date}</span></span></Button>)}</section>}
-    <DashboardRouter activeMenu={currentActive} onNavigate={setActiveMenu} />
-  </ModuleShell>;
+
+  return (
+    <div className="module-workspace space-y-6">
+      <PageHeader
+        title="College Portal"
+        subtitle={`${roleLabels[currentUser.role]} · ${currentUser.name} · ${deptName(data, currentUser.departmentId)}`}
+        actions={<>
+          <Button variant="outline" size="sm" className="gap-1.5 relative" onClick={() => setNotifOpen(!notifOpen)}>
+            <Bell className="size-4" /> Notifications
+            {unreadCount > 0 && <span className="ml-1 rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">{unreadCount}</span>}
+          </Button>
+          {!hideSignOut && <Button variant="outline" size="sm" className="gap-1.5" onClick={logout}><LogOut className="size-4" /> Switch user</Button>}
+        </>}
+      />
+      <div className="border-b border-border -mt-2 overflow-x-auto scrollbar-thin">
+        <nav className="flex gap-1 -mb-px min-w-max">
+          {userMenus.map(item => {
+            const active = currentActive === item.id;
+            return (
+              <button key={item.id} onClick={() => setActiveMenu(item.id)}
+                className={cn("flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap",
+                  active ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>
+                <item.icon className="size-4" />{item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+      {notifOpen && <section className="rounded-lg border border-border bg-card p-4">
+        <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Notifications</h2><Button variant="ghost" size="sm" onClick={() => setNotifOpen(false)}>Close</Button></div>
+        {userNotifs.length === 0 ? <p className="text-sm text-muted-foreground">No notifications</p> : userNotifs.map(n => <Button key={n.id} variant="ghost" className="h-auto w-full justify-start whitespace-normal py-3 text-left" onClick={() => { markNotificationRead(n.id); if (n.title === 'Final Examination Schedule Published' && currentUser.role === 'hod') setActiveMenu('h-academic-management'); setNotifOpen(false); }}><span><span className="block font-medium">{n.title}</span><span className="block text-xs text-muted-foreground">{n.message}</span><span className="block text-xs text-muted-foreground">{n.date}</span></span></Button>)}
+      </section>}
+      <div className="min-w-0">
+        <DashboardRouter activeMenu={currentActive} onNavigate={setActiveMenu} />
+      </div>
+    </div>
+  );
 }
 export { useStore };
 export type { ReactNode };
