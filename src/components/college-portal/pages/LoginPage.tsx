@@ -11,7 +11,7 @@ const roleGroups: { group: string; icon: React.ReactNode; roles: Role[] }[] = [
   { group: 'Non-Teaching Staff', icon: <Wrench className="w-4 h-4" />, roles: ['office-superintendent', 'lab-assistant'] },
 ];
 
-export function LoginPage() {
+export function LoginPage({ hideRoles = [] }: { hideRoles?: Role[] } = {}) {
   const { data, login } = useStore();
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
@@ -31,7 +31,7 @@ export function LoginPage() {
               <h2 className="text-2xl font-bold text-slate-900">Select designation</h2>
               <p className="text-sm text-slate-500 mt-1 mb-8">Select your designation.</p>
               <div className="space-y-6">
-                {roleGroups.map((g) => (
+                {roleGroups.map((g) => ({ ...g, roles: g.roles.filter((r) => !hideRoles.includes(r)) })).filter((g) => g.roles.length).map((g) => (
                   <div key={g.group}>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-slate-500">{g.icon}</span>

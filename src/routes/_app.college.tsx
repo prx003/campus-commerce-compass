@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { StoreProvider, useStore } from "@/components/college-portal/store/StoreContext";
 import { LoginPage } from "@/components/college-portal/pages/LoginPage";
 import { AppShell } from "@/components/college-portal/pages/AppShell";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/college")({
   head: () => ({
@@ -18,11 +20,24 @@ export const Route = createFileRoute("/_app/college")({
 });
 
 function CollegePortal() {
-  const { currentUser } = useStore();
+  const { currentUser, data, login } = useStore();
+  const { roles } = useAuth();
+  const isPrincipal = roles.includes("principal");
 
+  // A principal only gets the principal workspace.
+  useEffect(() => {
+    if (!isPrincipal) return;
+    if (currentUser?.role === "principal") return;
+    const p = data.staff.find((s) => s.role === "principal");
+    if (p) login(p.id);
+  }, [isPrincipal, currentUser, data.staff, login]);
+
+  if (isPrincipal) {
+    return <div className="college-portal">{currentUser?.role === "principal" ? <AppShell hideSignOut /> : null}</div>;
+  }
   return (
     <div className="college-portal">
-      {currentUser ? <AppShell /> : <LoginPage />}
+      {currentUser ? <AppShell /> : <LoginPage hideRoles={roles.includes("admin") ? [] : ["principal"]} />}
     </div>
   );
 }
