@@ -37,7 +37,7 @@ function CollegePortal() {
   }
   return (
     <div className="college-portal">
-      {currentUser ? <AppShell /> : <LoginPage hideRoles={["principal"]} />}
+      {currentUser ? <AppShell /> : <LoginPage hideRoles={roles.includes("admin") ? [] : ["principal"]} />}
     </div>
   );
 }
