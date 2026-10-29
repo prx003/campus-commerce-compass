@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 
 export function Topbar() {
   const { theme, toggle } = useTheme();
-  const { user, roles } = useAuth();
-  void user;
-  const name = "Guest";
+  const { roles, setRole } = useAuth();
+  const name = roles[0] ? ROLE_LABELS[roles[0]] : "Guest";
   const initials = name.split(/[\s@.]/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
 
   return (
@@ -49,7 +48,7 @@ export function Topbar() {
         <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-destructive ring-2 ring-background" />
       </button>
 
-      <button className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-md hover:bg-accent">
+      <button onClick={() => setRole(null)} title="Switch role" className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-md hover:bg-accent">
         <div className="size-8 rounded-full bg-gradient-to-br from-primary to-chart-5 grid place-items-center text-primary-foreground text-xs font-semibold">
           {initials}
         </div>

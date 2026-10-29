@@ -1,4 +1,5 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 export type AppRole =
   | "admin" | "principal" | "hr" | "academic" | "admissions"
@@ -31,13 +32,43 @@ export function canAccess(roles: AppRole[], path: string) {
   });
 }
 
-type AuthState = { user: null; roles: AppRole[]; loading: boolean };
-// No sign-in: everyone gets full access to every section.
-const OPEN: AuthState = { user: null, roles: ["principal"], loading: false };
-const Ctx = createContext<AuthState>(OPEN);
+type AuthState = { user: null; roles: AppRole[]; loading: boolean; setRole: (r: AppRole | null) => void };
+const KEY = "app-role";
+const Ctx = createContext<AuthState>({ user: null, roles: [], loading: true, setRole: () => {} });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  return <Ctx.Provider value={OPEN}>{children}</Ctx.Provider>;
+  const [role, setRoleState] = useState<AppRole | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const saved = localStorage.getItem(KEY) as AppRole | null;
+    if (saved && saved in ROLE_LABELS) setRoleState(saved);
+    setLoading(false);
+  }, []);
+  const setRole = (r: AppRole | null) => {
+    if (r) localStorage.setItem(KEY, r); else localStorage.removeItem(KEY);
+    setRoleState(r);
+  };
+  const value: AuthState = { user: null, roles: role ? [role] : [], loading, setRole };
+  if (!loading && !role) return <Ctx.Provider value={value}><RolePicker onPick={setRole} /></Ctx.Provider>;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+function RolePicker({ onPick }: { onPick: (r: AppRole) => void }) {
+  return (
+    <div className="min-h-screen w-full grid place-items-center bg-background p-6">
+      <div className="w-full max-w-lg">
+        <h1 className="text-2xl font-semibold">Choose your role</h1>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">You'll only see the sections for this role.</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {(Object.keys(ROLE_LABELS) as AppRole[]).map((r) => (
+            <Button key={r} variant="outline" className="h-14 justify-start" onClick={() => onPick(r)}>
+              {ROLE_LABELS[r]}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export const useAuth = () => useContext(Ctx);
