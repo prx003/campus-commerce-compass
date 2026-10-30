@@ -1,6 +1,6 @@
 # Roadmap
 
-- [in-progress] Match College Portal navigation to Sales with expandable, role-specific sidebar pages; verify sidebar and tabs stay synchronized.
+- [done] Match College Portal navigation to Sales with expandable, role-specific sidebar pages; verified Principal sidebar, synchronized tabs, browser Back and existing role lock.
 
 - [in-progress] Correct missing Sales Call Center menu and wire imported pages; verify upload, assignment, outcomes and reports
 - [in-progress] Clone rush-this repo into project, enable Lovable Cloud, apply repo migrations (done)
