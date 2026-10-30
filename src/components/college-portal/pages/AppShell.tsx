@@ -25,7 +25,7 @@ export function AppShell({ hideSignOut = false }: { hideSignOut?: boolean } = {}
   }, [role, setWorkspaceRole]);
   if (!currentUser) return null;
   const userMenus = menus[currentUser.role];
-  const currentActive = userMenus.some(item => item.id === activeMenu) ? activeMenu : userMenus[0]?.id ?? '';
+  const currentActive = userMenus.find(item => item.id === activeMenu)?.id ?? userMenus[0]?.id ?? '';
   const userNotifs = notifications.filter(n => n.audience.includes(currentUser.role) && (!n.targetUserIds || n.targetUserIds.includes(currentUser.id)));
   const unreadCount = userNotifs.filter(n => !n.read).length;
 
