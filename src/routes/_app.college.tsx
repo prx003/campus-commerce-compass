@@ -6,6 +6,9 @@ import { AppShell } from "@/components/college-portal/pages/AppShell";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/college")({
+  validateSearch: (search: Record<string, unknown>): { page?: string } => ({
+    page: typeof search.page === "string" ? search.page : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "College Management Portal — Edusphere" },

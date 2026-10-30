@@ -26,13 +26,15 @@ import { cn } from "@/lib/utils";
 import { useAuth, canAccess } from "@/lib/auth";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCollegeNavigation } from "@/components/college-portal/config/NavigationContext";
+import { menus } from "@/components/college-portal/config/menus";
 
 type Item = {
   to: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string | null;
-  children?: { to: string; label: string }[];
+  children?: { to: string; label: string; page?: string }[];
 };
 
 const NAV: Item[] = [
@@ -89,8 +91,18 @@ const NAV: Item[] = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { roles } = useAuth();
-  const items = [...NAV.filter((i) => canAccess(roles, i.to)), ...(roles.includes("admin") ? [{ to: "/users", label: "Users & Roles", icon: ShieldCheck } as Item] : [])];
+  const { workspaceRole } = useCollegeNavigation();
+  const collegeRole = roles.includes("principal") ? "principal" : workspaceRole;
+  const items = [...NAV.filter((i) => canAccess(roles, i.to)).map((item): Item => item.to === "/college" ? {
+    ...item,
+    children: collegeRole
+      ? menus[collegeRole].map((page) => ({ to: "/college", label: page.label, page: page.id }))
+      : [{ to: "/college", label: "Select workspace" }],
+  } : item), ...(roles.includes("admin") ? [{ to: "/users", label: "Users & Roles", icon: ShieldCheck } as Item] : [])];
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.search as { page?: string } });
+  const selectedCollegePage = collegeRole && menus[collegeRole].some((page) => page.id === search.page)
+    ? search.page : collegeRole ? menus[collegeRole][0]?.id : undefined;
   const [open, setOpen] = useState<Record<string, boolean>>({
     "/admission": pathname.startsWith("/admission"),
   });
@@ -130,6 +142,7 @@ export function Sidebar() {
             return (
               <div key={item.to}>
                  <Button variant="ghost"
+                  aria-expanded={isOpen}
                   onClick={() => setOpen((o) => ({ ...o, [item.to]: !isOpen }))}
                   className={cn(
                     "w-full group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -145,11 +158,13 @@ export function Sidebar() {
                 {isOpen && (
                   <div className="mt-0.5 ml-5 pl-3 border-l border-sidebar-border space-y-0.5">
                      {item.children?.map((c) => {
-                       const cActive = pathname === c.to;
+                       const cActive = pathname === c.to && (!c.page || selectedCollegePage === c.page);
                       return (
                         <Link
-                          key={c.to}
+                          key={c.page ?? c.to}
                           to={c.to}
+                          search={c.to === "/college" ? { page: c.page } : undefined}
+                          aria-current={cActive ? "page" : undefined}
                           className={cn(
                             "flex items-center rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors",
                             cActive
