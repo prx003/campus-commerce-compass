@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { getRouteApi } from '@tanstack/react-router';
 import { Bell, LogOut } from 'lucide-react';
 import { useStore, roleLabels, deptName } from '../store/StoreContext';
 import { menus } from '../config/menus';
@@ -6,11 +7,22 @@ import { DashboardRouter } from './DashboardRouter';
 import { PageHeader } from '@/components/ui/page';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCollegeNavigation } from '../config/NavigationContext';
+
+const collegeRoute = getRouteApi('/_app/college');
 
 export function AppShell({ hideSignOut = false }: { hideSignOut?: boolean } = {}) {
   const { currentUser, data, logout, notifications, markNotificationRead } = useStore();
-  const [activeMenu, setActiveMenu] = useState('');
+  const { page: activeMenu } = collegeRoute.useSearch();
+  const navigate = collegeRoute.useNavigate();
+  const { setWorkspaceRole } = useCollegeNavigation();
+  const setActiveMenu = (page: string) => { void navigate({ search: { page } }); };
   const [notifOpen, setNotifOpen] = useState(false);
+  const role = currentUser?.role ?? null;
+  useEffect(() => {
+    setWorkspaceRole(role);
+    return () => setWorkspaceRole(null);
+  }, [role, setWorkspaceRole]);
   if (!currentUser) return null;
   const userMenus = menus[currentUser.role];
   const currentActive = userMenus.some(item => item.id === activeMenu) ? activeMenu : userMenus[0]?.id ?? '';
@@ -31,15 +43,15 @@ export function AppShell({ hideSignOut = false }: { hideSignOut?: boolean } = {}
         </>}
       />
       <div className="border-b border-border -mt-2 overflow-x-auto scrollbar-thin">
-        <nav className="flex gap-1 -mb-px min-w-max">
+        <nav aria-label="College Portal pages" className="flex gap-1 -mb-px min-w-max">
           {userMenus.map(item => {
             const active = currentActive === item.id;
             return (
-              <button key={item.id} onClick={() => setActiveMenu(item.id)}
-                className={cn("flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap",
+              <Button variant="ghost" key={item.id} onClick={() => setActiveMenu(item.id)} aria-current={active ? 'page' : undefined}
+                className={cn("h-auto rounded-none flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap hover:bg-transparent",
                   active ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>
                 <item.icon className="size-4" />{item.label}
-              </button>
+              </Button>
             );
           })}
         </nav>

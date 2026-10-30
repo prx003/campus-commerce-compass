@@ -37,6 +37,14 @@ import { Button } from "@/components/ui/button";
 import { useAuth, canAccess, ROLE_LABELS, type AppRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/")({
+  head: () => ({ meta: [
+    { title: "Edusphere — Workspace Dashboard" },
+    { name: "description", content: "Your Edusphere workspace for admissions, academics, college operations and team activity." },
+    { property: "og:title", content: "Edusphere — Workspace Dashboard" },
+    { property: "og:description", content: "An overview of your school and college operations and team activity." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: Dashboard,
 });
 
